@@ -7,7 +7,6 @@ ASC module is responsible for providing affordances detection and action paramet
 ASC module requires perception module to run.
 
 ## Usage
-
-        rosrun imagine_asc asc.py
+    rosrun imagine_asc asc.py
 ## Test
-        rosrun imagine_asc aff_tester.py
+    rosrun imagine_asc aff_tester.py
