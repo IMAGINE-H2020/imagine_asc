@@ -60,17 +60,19 @@ class unetmodel:
             return model
         self.model = unet([(256,256,3)],
                     ['Orj_resized'],
-                    ['Aff_mask'],
+                    ["a","b",'Aff_mask'],
                     [64,128,256,512,1024])
         rospack = rospkg.RosPack()
 
-        self.model.load_weights(os.path.join(rospack.get_path('test_image'),'weights/'+model_name+'.hdf5'))
+        self.model.load_weights(os.path.join(rospack.get_path('imagine_asc'),'weights/'+model_name+'.hdf5'))
         self.model._make_predict_function()
     def predict(self,img):
         
         resized_image = cv2.resize(img, (256, 256))
         result = self.model.predict({'Orj_resized':resized_image.reshape(-1,256,256,3)/255.0})
 
-        Aff_masks=result.reshape(256,256)*255
-
-        return Aff_masks.astype('uint8')
+        aff_masks=result[2].reshape(256,256)*255
+        print np.max(aff_masks)
+        aff_masks[aff_masks>120]=255
+        aff_masks[aff_masks<151]=0
+        return aff_masks.astype('uint8')
