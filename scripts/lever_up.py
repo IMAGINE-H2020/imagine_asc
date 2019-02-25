@@ -36,6 +36,10 @@ class Lever_Up:
 	def find_affordance(self,data):
 		aff_list=list()
 		any_screw_on_pcb=False
+		try:
+			self.curr_img = self.bridge.imgmsg_to_cv2(data.assos_img, "bgr8")			
+		except CvBridgeError as e:
+			print(e)
 		for part in data.part_array:
 			partname=part.part_id[:-1]
 			if partname=='screw':
@@ -46,7 +50,7 @@ class Lever_Up:
 		if any_screw_on_pcb==False:
 			aff=Affordance()
 			aff.object_name=pcb.part_id
-			aff_mask=self.model.predict(data.assos_img)
+			aff_mask=self.model.predict(self.curr_img)
 			leverup_points,confidences=self.sample_leverup_points(aff_mask)
 			aff.effect_name='levered'
 			aff.affordance_name='leverable'
