@@ -5,6 +5,7 @@ import tf2_msgs.msg
 from geometry_msgs.msg import Point
 from geometry_msgs.msg import TransformStamped
 from imagine_common.srv import EffectMarker
+from imagine_common.srv import EffectMarkerResponse
 from visualization_msgs.msg import Marker
 import std_msgs.msg
 import tf
@@ -27,17 +28,17 @@ def handle_effect_marker(req):
     marker.pose.orientation.z = req.pose.orientation.z #0
     marker.pose.orientation.w = req.pose.orientation.w #1.0
     rate = rospy.Rate(100)
-    for i in range(10):
+    for i in range(100):
         print marker
         effect_publisher.publish(marker)
         rate.sleep()
-    return
+    return EffectMarkerResponse(True)
 
 def effect_marker_server():
     global effect_publisher,marker
     rospy.init_node('effect_marker_server')
     s = rospy.Service('effect_marker', EffectMarker, handle_effect_marker)
-    effect_publisher = rospy.Publisher('lever_up_effect', Marker, queue_size=10)
+    effect_publisher = rospy.Publisher('/asc/lever_up_effect', Marker, queue_size=10)
     rospack = rospkg.RosPack()
 
     effect = np.loadtxt(rospack.get_path('imagine_asc')+"/10_10.txt")

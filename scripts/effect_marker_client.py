@@ -17,13 +17,13 @@ def effect_marker_client(pose):
 
 if __name__ == "__main__":
     pose = Pose()
-    pose.position.x = 0.3
-    pose.position.y = 0
-    pose.position.z = 0.6
-    r = tf.transformations.quaternion_from_euler(0, 0, 0.78539816339)
+    pose.position.x = 0.559
+    pose.position.y = -0.006
+    pose.position.z = 0.002
+    r = tf.transformations.quaternion_from_euler(0, 0, 0)
     pose.orientation.x = r[0]
     pose.orientation.y = r[1]
     pose.orientation.z = r[2]
     pose.orientation.w = r[3]
     print "Requesting ",pose
-    effect_marker_client(pose)
+    print effect_marker_client(pose)
