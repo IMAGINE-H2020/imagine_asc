@@ -48,19 +48,14 @@ class unetmodel:
                         padding = 'same', kernel_initializer = 'he_normal')(conv)
             x = Conv2D(2, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(x)    
 
-            x = Conv2D(len(output_names), 1, activation = 'sigmoid')(x)
-            outputs_list=list()
-            for output_ind in range(len(output_names)): 
-                mask=Lambda(lambda x: x[:,:,:,output_ind:output_ind+1],
-                            output_shape=(256,256,1),name=output_names[output_ind])(x)
-                outputs_list.append(mask)
-
-            model = Model(inputs = inputs_list, outputs = outputs_list)
+            output = Conv2D(len(output_names), 1, activation = 'sigmoid')(x)
+        
+            model = Model(inputs = inputs_list, outputs = output)
 
             return model
         self.model = unet([(256,256,3)],
-                    ['Orj_resized'],
-                    ["a","b",'Aff_mask'],
+                    ['img'],
+                    ['mask0'],
                     [64,128,256,512,1024])
         rospack = rospkg.RosPack()
 
@@ -69,10 +64,9 @@ class unetmodel:
     def predict(self,img):
         
         resized_image = cv2.resize(img, (256, 256))
-        result = self.model.predict({'Orj_resized':resized_image.reshape(-1,256,256,3)/255.0})
+        result = self.model.predict({'img':resized_image.reshape(-1,256,256,3)/255.0})
 
-        aff_masks=result[2].reshape(256,256)*255
-        print np.max(aff_masks)
-        aff_masks[aff_masks>120]=255
+        aff_masks=result.reshape(256,256)*255
+        aff_masks[aff_masks>100]=255
         aff_masks[aff_masks<151]=0
         return aff_masks.astype('uint8')

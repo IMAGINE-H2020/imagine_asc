@@ -10,6 +10,7 @@ from screwability import *
 from suckablity import *
 from lever_up import *
 def main(args):
+  rospy.init_node('asc')
   affordance_wrapper = affordanceWrapper()
   ######### Add affordance models here #####################
   screwability=Screwability()
@@ -19,7 +20,6 @@ def main(args):
   leverability=Lever_Up()
   affordance_wrapper.addAffordanceModel('pcb','leverability','leverable',leverability.required_parts_for_affordance,leverability.find_affordance)
   ##########################################################
-  rospy.init_node('asc')
   rospy.spin()
 if __name__ == '__main__':
     main(sys.argv)

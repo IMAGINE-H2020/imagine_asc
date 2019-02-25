@@ -12,20 +12,14 @@ from imagine_common.srv import *
 
 class affordanceWrapper:
   def __init__(self):
-    self.curr_data=PartArray()
     self.affordance_list=[]
     self.affordance_funcs={}
     self.available_parts=[]
     self.required_parts_for_affordance={}
-    rospy.wait_for_service('/perception/request_parts')
-    try:
-      self.perc = rospy.ServiceProxy('/perception/request_parts', PartArray)
-    except rospy.ServiceException, e:
-      print "Service call failed: %s"%e
     self.s = rospy.Service('/asc/request_affordances', AffordanceArray, self.requestAffordances)
 
-  def updateDataRequest(self):
-    self.curr_data=self.perc()
+  def updateDataRequest(self,request):
+    self.curr_data=request
     self.available_parts=list()
     for part in self.curr_data.part_array:
       partname=part.part_id[:-1]
@@ -40,7 +34,7 @@ class affordanceWrapper:
 
 
   def requestAffordances(self,request):
-    self.updateDataRequest()
+    self.updateDataRequest(request)
     aff_arr_resp =AffordanceArrayResponse()
     for aff in self.affordance_list:
       if set(self.required_parts_for_affordance[aff]).issubset(self.available_parts):
