@@ -1,5 +1,5 @@
 # Introduction to ASC
-This repo includes the nodes of ASC module. ASC module is responsible for detecting the affordances and providing the action parametes for execution. The message and service files used in this module are provided in imagine_common repo (See: [imagine_common](https://github.com/IMAGINE-H2020/imagine_common.git) ). 
+This repo includes the nodes of ASC module. ASC module is responsible for detecting the affordances and providing the action parametes for execution. The message and service files used in this module are provided in imagine_common repo (See: [imagine_common](https://github.com/IMAGINE-H2020/imagine_common.git)). 
 
 # Requirements
 * Common repo that includes messages and services should be included in the workspace [imagine_common](https://github.com/IMAGINE-H2020/imagine_common)
