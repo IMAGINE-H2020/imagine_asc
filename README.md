@@ -8,7 +8,7 @@ This repo includes the nodes of ASC module. ASC module is responsible for detect
 
 * Some of the scripts require weights learned after training. The weigths should be put inside the imagine_asc folder. These weigts are available [here](https://drive.google.com/drive/folders/1vaPicIv9qmm_K3UOmeH0jeA8NSt1y6Zm?usp=sharing)
 
-* 
+* **Additional Libraries** : [Numpy](http://www.numpy.org/), [Tensorflow](https://www.tensorflow.org/), [Keras](https://www.tensorflow.org/), [cv2 and cv_bridge](http://wiki.ros.org/opencv2), [skimage](http://scikit-image.org/docs/dev/api/skimage.html) and [vision_msgs](http://wiki.ros.org/vision_msgs). 
 
 # Installation
 No installation is needed to run this module.
@@ -23,3 +23,4 @@ The following line that prints either an error or service result can be run to t
 ```
     rosrun imagine_asc aff_tester.py
 ```    
+The service provides affordance and effect information in the environment. Details of the structure and format, and examples of messages to explain the usage can be found in [asc messages](https://github.com/IMAGINE-H2020/imagine_common/tree/master/msg/asc).
