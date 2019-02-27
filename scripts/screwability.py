@@ -13,18 +13,21 @@ from imagine_common.msg import *
 from geometry_msgs.msg import *
 class Screwability:
     def __init__(self):
-        self.required_parts_for_affordance=['screw'] 
+        self.required_parts_for_affordance=[] 
     def find_affordance(self,data):
         aff_list=[]
         for part in data.part_array:
             partname=part.part_id[:-1]
-            if partname=='screw':
+            if partname=='screw' or 'bearing':
                 aff=Affordance()
                 aff.object_name=part.part_id
                 aff.effect_name='unscrewable'
                 aff.affordance_name='unscrewability'
                 ap= ActionParameters()
-                ap.confidence=0.95
+                if (part.partname == 'bearing'):
+                    ap.confidence = part.part_type_specifics_confidence  
+                else:
+                    ap.confidence = part.part_type_confidence                                      
                 asc_pair =AscPair()
                 asc_pair.key='start position'
                 asc_pair.value_type=2

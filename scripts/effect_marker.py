@@ -41,7 +41,7 @@ def effect_marker_server():
     effect_publisher = rospy.Publisher('/asc/lever_up_effect', Marker, queue_size=10)
     rospack = rospkg.RosPack()
 
-    effect = np.loadtxt(rospack.get_path('imagine_asc')+"/10_10.txt")
+    effect = np.loadtxt(rospack.get_path('imagine_asc')+"/10_10.txt")/2.
     marker= Marker()
     h = std_msgs.msg.Header()
     h.stamp = rospy.Time.now()
@@ -63,7 +63,7 @@ def effect_marker_server():
         point = Point()
         point.x=effect[i,1]
         point.y=effect[i,0]
-        point.z=effect[i,2]-0.65
+        point.z=effect[i,2]-0.325
         marker.points.append(point)
     print "Effect Marker is ready."
     rospy.spin()
