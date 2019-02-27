@@ -20,7 +20,7 @@ if __name__ == "__main__":
     pose = Pose()
     pose.position.x = 0.559
     pose.position.y = -0.086
-    pose.position.z = 0.002
+    pose.position.z = 0.032
     r = tf.transformations.quaternion_from_euler(0, 0, (-90/180.)*math.pi)
     pose.orientation.x = r[0]
     pose.orientation.y = r[1]
