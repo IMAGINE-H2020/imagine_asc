@@ -48,8 +48,8 @@ class Lever_Up:
 			tmp_img_[:,:,0]=tmp_img[:,:,2]
 			tmp_img_[:,:,1]=tmp_img[:,:,1]
 			tmp_img_[:,:,2]=tmp_img[:,:,0]
-			tmp_img2=ImageEnhance.Color(Image.fromarray(tmp_img_)).enhance(4)
-			self.curr_img=image.img_to_array(tmp_img2)		
+			#tmp_img2=ImageEnhance.Color(Image.fromarray(tmp_img_)).enhance(4)
+			self.curr_img=tmp_img_#image.img_to_array(tmp_img2)		
 		except CvBridgeError as e:
 			print(e)
 		for part in data.part_array:
@@ -98,14 +98,18 @@ class Lever_Up:
 				w_size=9
 				tmp_img = self.bridge.imgmsg_to_cv2(pcb.part_outline.part_mask, pcb.part_outline.part_mask.encoding)
 				tmp_img = cv2.resize(tmp_img, (256, 256)) 
-				temp=tmp_img[max(0,x-w_size):min(256,x+w_size),max(0,y-w_size):min(256,y+w_size),:]
+				temp=tmp_img[max(0,x-w_size):min(256,x+w_size),max(0,y-w_size):min(256,y+w_size)]
 				#hsv_temp = cv2.cvtColor(temp, cv2.COLOR_RGB2HSV)
 				#green_start=(65, 0, 40)
 				#green_end=(150, 255, 255)
 				#mask = cv2.inRange(hsv_temp, green_start, green_end)
 				x1,y1= np.where(temp==255)
-				x2,y2= np.where(temp==0) 
-				direction =math.pi/2 +math.atan2(y2-y1,x2-x1)
+				x2,y2= np.where(temp==0)
+				direction =math.pi/2 +math.atan2(np.mean(y2)-np.mean(y1),np.mean(x2)-np.mean(x1))
+				if np.isnan(direction) or np.isinf(direction):
+					#print direction
+					#direction=0
+					continue
 				import tf
 				quaternion = tf.transformations.quaternion_from_euler(0,0,direction)
 				if i==0:
