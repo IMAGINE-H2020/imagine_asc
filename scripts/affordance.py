@@ -16,7 +16,7 @@ class affordanceWrapper:
     self.affordance_funcs={}
     self.available_parts=[]
     self.required_parts_for_affordance={}
-    self.s = rospy.Service('/asc/request_affordances', AffordanceArray, self.requestAffordances)
+    self.s = rospy.Service('asc/request_affordances', AffordanceArray, self.requestAffordances)
 
   def updateDataRequest(self,request):
     self.curr_data=request

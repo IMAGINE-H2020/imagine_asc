@@ -13,17 +13,17 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from imagine_common.srv import *
 from PIL import Image,ImageEnhance
-from visualization_msgs.msg import	MarkerArray
+from visualization_msgs.msg import	MarkerArray,Marker
 from keras.preprocessing import image
 from imagine_common.msg import *
-from geometry_msgs.msg import *
+import geometry_msgs.msg
 class Lever_Up:
 	def __init__(self):
-		self.required_parts_for_affordance=['pcb'] 
+		self.required_parts_for_affordance=[]#['pcb'] 
 		self.model = unetmodel('unet_lever_up')
 		self.bridge = CvBridge()
-		self.pixel_world_srv= rospy.ServiceProxy("/perception/world2pixel", ConvertPixel2World	)
-		self.lever_up_rviz = rospy.Publisher('/asc/lever_up_points',MarkerArray)
+		self.pixel_world_srv= rospy.ServiceProxy('perception/pixel2world', ConvertPixel2World)
+		self.lever_up_rviz = rospy.Publisher('asc/lever_up_points',MarkerArray,queue_size=1)
 
 	def sample_leverup_points(self,mask,img_shape=256,window_size=6):
 		leverup_points = list()
@@ -42,8 +42,13 @@ class Lever_Up:
 		aff_list=list()
 		any_screw_on_pcb=False
 		try:
-			tmp_img = self.bridge.imgmsg_to_cv2(data.assos_img, "bgr8")
-			tmp_img2=ImageEnhance.Color(tmp_img).enhance(4)
+#			import IPython; IPython.embed()
+			tmp_img = self.bridge.imgmsg_to_cv2(data.assos_img, data.assos_img.encoding)
+			tmp_img_ = np.zeros_like(tmp_img)
+			tmp_img_[:,:,0]=tmp_img[:,:,2]
+			tmp_img_[:,:,1]=tmp_img[:,:,1]
+			tmp_img_[:,:,2]=tmp_img[:,:,0]
+			tmp_img2=ImageEnhance.Color(Image.fromarray(tmp_img_)).enhance(4)
 			self.curr_img=image.img_to_array(tmp_img2)		
 		except CvBridgeError as e:
 			print(e)
@@ -56,19 +61,22 @@ class Lever_Up:
 				pcb=part    
 		if any_screw_on_pcb==False:
 			aff=Affordance()
-			aff.object_name=pcb.part_id
+			aff.object_name='pcb'#pcb.part_id
 			img_w = self.curr_img.shape[0]
 			img_h = self.curr_img.shape[1]
+			print img_w,img_h 
 			aff_mask=self.model.predict(self.curr_img)
-			cv2.imwrite('messi.png',aff_mask)
+
+			cv2.imwrite('/home/colors/messi.png',aff_mask)
 			leverup_points,confidences=self.sample_leverup_points(aff_mask)
 			aff.effect_name='levered'
 			aff.affordance_name='leverable'
 			leverup_points_converted=ConvertPixel2WorldRequest()
 			for i in range(len(leverup_points)):
-				lever_up_point = Point()
-				lever_up_point.x = leverup_points[i][0] * img_w/256.0
-				lever_up_point.y = leverup_points[i][1] * img_h/256.0
+				lever_up_point = geometry_msgs.msg.Point()
+				lever_up_point.y = leverup_points[i][0] * img_w/256.0
+				lever_up_point.x = leverup_points[i][1] * img_h/256.0
+				lever_up_point.z = 0
 				leverup_points_converted.pixels.append(lever_up_point)
 			resp = self.pixel_world_srv(leverup_points_converted)
 			markerArray= MarkerArray()
@@ -81,39 +89,50 @@ class Lever_Up:
 				lever_up_point.value_type = 2
 				lever_up_point.value_pose.position.x=resp.points[i].x
 				lever_up_point.value_pose.position.y=resp.points[i].y
-				lever_up_point.value_pose.position.x=resp.points[i].z
+				lever_up_point.value_pose.position.z=resp.points[i].z
+				if i==0:
+					print(lever_up_point)
 				ind= np.random.randint(0,len(leverup_points))
 				x= leverup_points[ind][0]
 				y= leverup_points[ind][1]
 				w_size=9
-				temp=img[max(0,x-w_size):min(256,x+w_size),max(0,y-w_size):min(256,y+w_size),:]
-				hsv_temp = cv2.cvtColor(temp, cv2.COLOR_RGB2HSV)
-				green_start=(65, 0, 40)
-				green_end=(150, 255, 255)
-				mask = cv2.inRange(hsv_temp, green_start, green_end)
-				x1,y1= np.where(mask==255)
-				x2,y2= np.where(mask==0)
-				direction =math.atan2(y2-y1,x2-x1)
-				quaternion = tf.transformations.quaternion_from_euler(0, 0, direction)
-				lever_up_point.value_pose.orientation=quaternion
+				tmp_img = self.bridge.imgmsg_to_cv2(pcb.part_outline.part_mask, pcb.part_outline.part_mask.encoding)
+				tmp_img = cv2.resize(tmp_img, (256, 256)) 
+				temp=tmp_img[max(0,x-w_size):min(256,x+w_size),max(0,y-w_size):min(256,y+w_size),:]
+				#hsv_temp = cv2.cvtColor(temp, cv2.COLOR_RGB2HSV)
+				#green_start=(65, 0, 40)
+				#green_end=(150, 255, 255)
+				#mask = cv2.inRange(hsv_temp, green_start, green_end)
+				x1,y1= np.where(temp==255)
+				x2,y2= np.where(temp==0) 
+				direction =math.pi/2 +math.atan2(y2-y1,x2-x1)
+				import tf
+				quaternion = tf.transformations.quaternion_from_euler(0,0,direction)
+				if i==0:
+					print(quaternion)
+				lever_up_point.value_pose.orientation.x=quaternion[0]
+				lever_up_point.value_pose.orientation.y=quaternion[1]
+				lever_up_point.value_pose.orientation.z=quaternion[2]
+				lever_up_point.value_pose.orientation.w=quaternion[3]
+
 				ap.parameters.append(lever_up_point)
 				h = std_msgs.msg.Header()
 				h.stamp = rospy.Time.now()
-				h.frame_id="world"#"lever_up_pose"
+				h.frame_id=resp.header.frame_id#"world"#"lever_up_pose"
 				marker.header=h
 				marker.ns= "lever_up_points"
 				marker.id=i
 				marker.type= 0 # arrow
 				marker.action = 0
 				marker.scale.x=0.01
-				marker.scale.y=0.01
-				marker.scale.z=0.01
-				marker.lifetime = rospy.Duration(5000)
+				marker.scale.y=0.005
+				marker.scale.z=0.001
+				marker.lifetime = rospy.Duration(0)
 				marker.color.r=1.0
 				marker.color.g=0.0
 				marker.color.b=0.0
 				marker.color.a=1.0
-				marker.pose=lever_up_point.value_pose
+				marker.pose=lever_up_point.value_pose	
 				markerArray.markers.append(marker)
 				aff.action_parameters_array.append(ap)
 			aff_list.append(aff)
