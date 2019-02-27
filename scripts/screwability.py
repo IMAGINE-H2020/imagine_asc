@@ -24,7 +24,7 @@ class Screwability:
                 aff.effect_name='unscrewable'
                 aff.affordance_name='unscrewability'
                 ap= ActionParameters()
-                if (part.partname == 'bearing'):
+                if (partname == 'bearing'):
                     ap.confidence = part.part_type_specifics_confidence  
                 else:
                     ap.confidence = part.part_type_confidence                                      
