@@ -35,7 +35,7 @@ class Lever_Up:
 			for j in range(w,img_shape-w):
 				if np.sum(mask[i-w:i+w,j-w:j+w])>threshold:
 					leverup_points.append((i,j))
-					confidence.append(np.sum(mask[i-w:i+w,j-w:j+w])/(window_size**2)/255*100)
+					confidence.append(np.sum(mask[i-w:i+w,j-w:j+w])/(window_size**2)/255.0)
 		return leverup_points,confidence
 
 	def find_affordance(self,data):
