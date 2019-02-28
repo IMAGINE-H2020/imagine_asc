@@ -18,7 +18,7 @@ class Screwability:
         aff_list=[]
         for part in data.part_array:
             partname=part.part_id[:-1]
-            if partname=='screw' or 'bearing':
+            if partname=='screw' or partname=='bearing':
                 aff=Affordance()
                 aff.object_name=part.part_id
                 aff.effect_name='unscrewable'

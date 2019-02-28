@@ -61,7 +61,7 @@ class Lever_Up:
 				pcb=part    
 		if any_screw_on_pcb==False:
 			aff=Affordance()
-			aff.object_name='pcb'#pcb.part_id
+			aff.object_name=pcb.part_id
 			img_w = self.curr_img.shape[0]
 			img_h = self.curr_img.shape[1]
 			print img_w,img_h 
@@ -99,21 +99,14 @@ class Lever_Up:
 				tmp_img = self.bridge.imgmsg_to_cv2(pcb.part_outline.part_mask, pcb.part_outline.part_mask.encoding)
 				tmp_img = cv2.resize(tmp_img, (256, 256)) 
 				temp=tmp_img[max(0,x-w_size):min(256,x+w_size),max(0,y-w_size):min(256,y+w_size)]
-				#hsv_temp = cv2.cvtColor(temp, cv2.COLOR_RGB2HSV)
-				#green_start=(65, 0, 40)
-				#green_end=(150, 255, 255)
-				#mask = cv2.inRange(hsv_temp, green_start, green_end)
+
 				x1,y1= np.where(temp==255)
 				x2,y2= np.where(temp==0)
 				direction =math.pi/2 +math.atan2(np.mean(y2)-np.mean(y1),np.mean(x2)-np.mean(x1))
 				if np.isnan(direction) or np.isinf(direction):
-					#print direction
-					#direction=0
 					continue
 				import tf
 				quaternion = tf.transformations.quaternion_from_euler(0,0,direction)
-				if i==0:
-					print(quaternion)
 				lever_up_point.value_pose.orientation.x=quaternion[0]
 				lever_up_point.value_pose.orientation.y=quaternion[1]
 				lever_up_point.value_pose.orientation.z=quaternion[2]
