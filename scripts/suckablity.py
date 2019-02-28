@@ -24,7 +24,7 @@ class Suckability:
                 any_screw_on_lid=True
             if partname=='lid':
                 lid=part    
-        
+        any_screw_on_lid=False
         if any_screw_on_lid==False:
             aff=Affordance()
             aff.object_name=part.part_id

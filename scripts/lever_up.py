@@ -19,16 +19,16 @@ from imagine_common.msg import *
 import geometry_msgs.msg
 class Lever_Up:
 	def __init__(self):
-		self.required_parts_for_affordance=[]#['pcb'] 
+		self.required_parts_for_affordance=['pcb'] 
 		self.model = unetmodel('unet_lever_up')
 		self.bridge = CvBridge()
-		self.pixel_world_srv= rospy.ServiceProxy('perception/pixel2world', ConvertPixel2World)
+		self.pixel_world_srv= rospy.ServiceProxy('/perception/pixel2world', ConvertPixel2World)
 		self.lever_up_rviz = rospy.Publisher('asc/lever_up_points',MarkerArray,queue_size=1)
 
 	def sample_leverup_points(self,mask,img_shape=256,window_size=6):
 		leverup_points = list()
 		confidence = list()
-		offset = 5
+		offset = 0
 		w = window_size//2
 		threshold = (window_size**2 - window_size - offset)*255.
 		for i in range(w,img_shape-w):
@@ -58,7 +58,8 @@ class Lever_Up:
 				any_screw_on_pcb=True
 			any_screw_on_pcb=False 
 			if partname=='pcb':
-				pcb=part    
+				pcb=part   
+
 		if any_screw_on_pcb==False:
 			aff=Affordance()
 			aff.object_name=pcb.part_id
@@ -95,15 +96,15 @@ class Lever_Up:
 				ind= np.random.randint(0,len(leverup_points))
 				x= leverup_points[ind][0]
 				y= leverup_points[ind][1]
-				w_size=9
+				w_size=7
 				tmp_img = self.bridge.imgmsg_to_cv2(pcb.part_outline.part_mask, pcb.part_outline.part_mask.encoding)
 				tmp_img = cv2.resize(tmp_img, (256, 256)) 
 				temp=tmp_img[max(0,x-w_size):min(256,x+w_size),max(0,y-w_size):min(256,y+w_size)]
-
+				#cv2.imwrite('/home/colors/test_direction/'+str(i)+'.jpg',temp)
 				x1,y1= np.where(temp==255)
 				x2,y2= np.where(temp==0)
-				direction =math.pi/2 +math.atan2(np.mean(y2)-np.mean(y1),np.mean(x2)-np.mean(x1))
-				if np.isnan(direction) or np.isinf(direction):
+				direction =math.pi + math.atan2(np.mean(y2)-np.mean(y1),np.mean(x2)-np.mean(x1))
+				if len(y2)==0 or len(y1)==0 or len(x2)==0 or len(x1)==0 or np.isnan(direction) or np.isinf(direction):
 					continue
 				import tf
 				quaternion = tf.transformations.quaternion_from_euler(0,0,direction)
@@ -122,8 +123,8 @@ class Lever_Up:
 				marker.type= 0 # arrow
 				marker.action = 0
 				marker.scale.x=0.01
-				marker.scale.y=0.005
-				marker.scale.z=0.001
+				marker.scale.y=0.001
+				marker.scale.z=0.002
 				marker.lifetime = rospy.Duration(0)
 				marker.color.r=1.0
 				marker.color.g=0.0
@@ -133,6 +134,9 @@ class Lever_Up:
 				markerArray.markers.append(marker)
 				aff.action_parameters_array.append(ap)
 			aff_list.append(aff)
-			self.lever_up_rviz.publish(markerArray)
+			rate=rospy.Rate(10)
+			for _ in range(5):
+				self.lever_up_rviz.publish(markerArray)
+				rate.sleep()
 		return aff_list
 
