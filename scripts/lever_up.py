@@ -23,7 +23,7 @@ class Lever_Up:
 		self.model = unetmodel('unet_lever_up')
 		self.bridge = CvBridge()
 		self.pixel_world_srv= rospy.ServiceProxy('/perception/pixel2world', ConvertPixel2World)
-		self.lever_up_rviz = rospy.Publisher('asc/lever_up_points',MarkerArray,queue_size=1)
+		self.lever_up_rviz = rospy.Publisher('asc/lever_up_points',MarkerArray,queue_size=1,latch=True)
 
 	def sample_leverup_points(self,mask,img_shape=256,window_size=6):
 		leverup_points = list()
