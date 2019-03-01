@@ -33,7 +33,7 @@ class Suckability:
             ap= ActionParameters()
             ap.confidence=0.95
             asc_pair =AscPair()
-            asc_pair.key='Suck Position'
+            asc_pair.key='start_pose'
             asc_pair.value_type=2
             asc_pair.value_pose=lid.pose
             ap.parameters.append(asc_pair)

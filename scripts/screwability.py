@@ -29,7 +29,7 @@ class Screwability:
                 else:
                     ap.confidence = part.part_type_confidence                                      
                 asc_pair =AscPair()
-                asc_pair.key='start position'
+                asc_pair.key='start_pose'
                 asc_pair.value_type=2
                 asc_pair.value_pose=part.pose
                 ap.parameters.append(asc_pair)
