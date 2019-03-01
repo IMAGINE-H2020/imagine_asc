@@ -15,7 +15,7 @@ from visualization_msgs.msg import MarkerArray,Marker
 
 class Suckability:
     def __init__(self):
-        self.required_parts_for_affordance=['lid'] 
+        self.required_parts_for_affordance=['drivers_lid'] 
 	self.suck_rviz = rospy.Publisher('asc/suck_points',MarkerArray,queue_size=1, latch=True)
 
     def find_affordance(self,data):
@@ -27,7 +27,7 @@ class Suckability:
             partname=part.part_id[:-1]
             if partname=='screw':
                 any_screw_on_lid=True
-            if partname=='lid':
+            if partname=='drivers_lid':
                 lid=part    
         any_screw_on_lid=False
         if any_screw_on_lid==False:
