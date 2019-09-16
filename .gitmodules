@@ -1,0 +1,6 @@
+[submodule "workspace/CNMP"]
+	path = workspace/CNMP
+	url = https://github.com/myunusseker/CNMP.git
+[submodule "workspace/Deep-Effect-Trajectory-Prediction-in-Robot-Manipulation"]
+	path = workspace/Deep-Effect-Trajectory-Prediction-in-Robot-Manipulation
+	url = https://github.com/Fzaero/Deep-Effect-Trajectory-Prediction-in-Robot-Manipulation.git
