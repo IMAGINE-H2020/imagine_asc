@@ -23,7 +23,7 @@ class Lever_Up:
 		self.model = unetmodel('unet_lever_up')
 		self.bridge = CvBridge()
 		self.pixel_world_srv= rospy.ServiceProxy('/perception/pixel2world', ConvertPixel2World)
-		self.lever_up_rviz = rospy.Publisher('asc/lever_up_points',MarkerArray,queue_size=1,latch=True)
+		self.lever_up_rviz = rospy.Publisher('asc/lever_up_points',MarkerArray,queue_size=1)
 
 	def sample_leverup_points(self,mask,img_shape=256,window_size=6):
 		leverup_points = list()
@@ -54,8 +54,6 @@ class Lever_Up:
 			print(e)
 		for part in data.part_array:
 			partname=part.part_id[:-1]
-			if partname=='screw':
-				any_screw_on_pcb=True
 			any_screw_on_pcb=False 
 			if partname=='pcb':
 				pcb=part   

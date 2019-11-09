@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   vision_msgs
   imagine_common
   std_msgs
+  message_generation
 )
 
 ## Generate added messages and services with any dependencies listed here

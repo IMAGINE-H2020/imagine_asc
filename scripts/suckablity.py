@@ -16,7 +16,7 @@ from visualization_msgs.msg import MarkerArray,Marker
 class Suckability:
     def __init__(self):
         self.required_parts_for_affordance=['drivers_lid'] 
-	self.suck_rviz = rospy.Publisher('asc/suck_points',MarkerArray,queue_size=1, latch=True)
+	self.suck_rviz = rospy.Publisher('asc/suck_points',MarkerArray,queue_size=1)
 
     def find_affordance(self,data):
         aff_list=[]

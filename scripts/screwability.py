@@ -16,7 +16,7 @@ from visualization_msgs.msg import MarkerArray,Marker
 class Screwability:
     def __init__(self):
         self.required_parts_for_affordance=[] 
-	self.unscrew_rviz = rospy.Publisher('asc/unscrew_points',MarkerArray,queue_size=1,latch=True)
+	self.unscrew_rviz = rospy.Publisher('asc/unscrew_points',MarkerArray,queue_size=1)
     def find_affordance(self,data):
         aff_list=[]
 	markerArray= MarkerArray()
