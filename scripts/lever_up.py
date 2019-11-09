@@ -44,17 +44,12 @@ class Lever_Up:
 		try:
 #			import IPython; IPython.embed()
 			tmp_img = self.bridge.imgmsg_to_cv2(data.assos_img, data.assos_img.encoding)
-			tmp_img_ = np.zeros_like(tmp_img)
-			tmp_img_[:,:,0]=tmp_img[:,:,2]
-			tmp_img_[:,:,1]=tmp_img[:,:,1]
-			tmp_img_[:,:,2]=tmp_img[:,:,0]
-			#tmp_img2=ImageEnhance.Color(Image.fromarray(tmp_img_)).enhance(4)
-			self.curr_img=tmp_img_#image.img_to_array(tmp_img2)		
+			tmp_img2=ImageEnhance.Color(Image.fromarray(tmp_img)).enhance(2)
+			self.curr_img=image.img_to_array(tmp_img2)	
 		except CvBridgeError as e:
 			print(e)
 		for part in data.part_array:
 			partname=part.part_id[:-1]
-			any_screw_on_pcb=False 
 			if partname=='pcb':
 				pcb=part   
 
@@ -66,7 +61,6 @@ class Lever_Up:
 			print img_w,img_h 
 			aff_mask=self.model.predict(self.curr_img)
 
-			cv2.imwrite('/home/colors/messi.png',aff_mask)
 			leverup_points,confidences=self.sample_leverup_points(aff_mask)
 			aff.effect_name='levered'
 			aff.affordance_name='leverable'
