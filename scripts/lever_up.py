@@ -19,8 +19,9 @@ from imagine_common.msg import *
 import geometry_msgs.msg
 
 class Lever_Up:
-    def __init__(self):
-        self.required_parts_for_affordance=['pcb'] 
+    def __init__(self,affordance,required_parts=[]):
+        self.affordance=affordance
+        self.required_parts_for_affordance=required_parts
         self.model = unetmodel('unet_lever_up')
         self.bridge = CvBridge()
         self.pixel_world_srv= rospy.ServiceProxy('/perception/pixel2world', ConvertPixel2World)

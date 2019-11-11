@@ -14,13 +14,14 @@ from geometry_msgs.msg import *
 from visualization_msgs.msg import MarkerArray,Marker
 
 class Screwability:
-    def __init__(self):
-        self.required_parts_for_affordance=[] 
+    def __init__(self,affordance,required_parts=[]):
+        self.affordance=affordance
+        self.required_parts_for_affordance=required_parts
         self.unscrew_rviz = rospy.Publisher('asc/unscrew_points',MarkerArray,queue_size=1)
     def find_affordance(self,data):
         aff_list=[]
         markerArray= MarkerArray()
-        no = 0    
+        no = 0
         for part in data.part_array:
             partname=part.part_id[:-1]
             if partname=='screw' or partname=='bearing':

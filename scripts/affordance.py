@@ -25,12 +25,12 @@ class affordanceWrapper:
             partname=part.part_id[:-1]
             self.available_parts.append(partname)
 
-    def addAffordanceModel(self,object_name,affordance_name,effect_name,required_parts,affordance_func):
-        aff=(affordance_name,object_name,effect_name)
+    def addAffordanceModel(self,affordance):
+        aff=affordance.affordance
         if aff not in self.affordance_list: 
             self.affordance_list.append(aff)
-        self.affordance_funcs[aff]=affordance_func
-        self.required_parts_for_affordance[aff]=required_parts
+        self.affordance_funcs[aff]=aff.find_affordance
+        self.required_parts_for_affordance[aff]=affordance.required_parts_for_affordance
 
 
     def requestAffordances(self,request):
