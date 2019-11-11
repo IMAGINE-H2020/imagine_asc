@@ -12,6 +12,8 @@ from imagine_common.srv import *
 from imagine_common.msg import *
 from geometry_msgs.msg import *
 from visualization_msgs.msg import MarkerArray,Marker
+import numpy as np 
+
 class Suckability:
     def __init__(self,affordance,required_parts=['lid']):
         self.affordance=affordance
@@ -20,10 +22,10 @@ class Suckability:
         self.bridge = CvBridge()
         self.pixel_world_srv= rospy.ServiceProxy('/perception/pixel2world', ConvertPixel2World)
 
-    def image_resize(image,width = 256,height = 256):
+    def image_resize(self, image, width = 256,height = 256):
         return cv2.resize(image, (width, height), interpolation = cv2.INTER_AREA)
 
-    def findCOM(img,width = 256,height = 256):
+    def findCOM(self, img, width = 256,height = 256):
         m = np.zeros((width, height))
         for x in range(width):
             for y in range(height):
@@ -40,9 +42,9 @@ class Suckability:
 
         return np.array([cx,cy])
     
-    def findSuckPoints(img, width = 256, height = 256, s_width = 40, s_height = 30):
+    def findSuckPoints(self, img, width = 256, height = 256, s_width = 40, s_height = 30):
         suck_points = []
-        mask_center = findCOM(img,width,height)
+        mask_center = self.findCOM(img,width,height)
         scale_min = 0.2
         scale_range = 1 - scale_min
         for x in range(width-s_width):
@@ -52,17 +54,16 @@ class Suckability:
                     distance_from_center = np.linalg.norm(mask_center - suction_candidate)
                     confidence = scale_range - (distance_from_center / 361.0 * scale_range) + scale_min 
                     suck_points.append([suction_candidate[0], suction_candidate[1], confidence])
-
-        suck_points_to_send=list()
-        for point in suck_points:
-            remove=False
-            for point2 in suck_points_to_send:
-                if (point[0]-point2[0])**2 + (point[1]-point2[1])**2<8:
-                    remove=True
-            if remove==False:
-                suck_points_to_send.append(point)
-    
-        return np.array(suck_points_to_send)
+        #suck_points_to_send=list()
+        #for point in suck_points:
+        #    remove=False
+        #    for point2 in suck_points_to_send:
+        #        if (point[0]-point2[0])**2 + (point[1]-point2[1])**2<8:
+        #            remove=True
+        #    if remove==False:
+        #        suck_points_to_send.append(point)
+        
+        return np.array(suck_points)[np.random.permutation(len(suck_points))[:50]]
 
     def find_affordance(self,data):
         aff_list=[]
@@ -77,18 +78,20 @@ class Suckability:
                 subtract_part=part_
         part_mask = self.bridge.imgmsg_to_cv2(part.part_outline.part_mask, part.part_outline.part_mask.encoding)
         img_w, img_h = part_mask.shape[0], part_mask.shape[1]
-        part_mask_scaled=self.image_resize(part_mask,256,256)
+        width_scaled = 256
+        height_scaled = 256
+        part_mask_scaled=self.image_resize(part_mask,width_scaled,height_scaled)
 
         if self.affordance[0]=='magnet':
-            suck_points = findSuckPoints(part_mask_scaled, width, height, 20, 10)
-        elif self.affordance[0]=='lid':
-            suck_points = findSuckPoints(part_mask_scaled, width, height, 40, 30)
+            suck_points = self.findSuckPoints(part_mask_scaled, width_scaled, height_scaled, 20, 10)
+        elif self.affordance[0]=='lid' or self.affordance[0]=='pcb':
+            suck_points = self.findSuckPoints(part_mask_scaled, width_scaled, height_scaled, 40, 30)
         elif self.affordance[0]=='platter':
             if subtract_part:
                 subtract_part_mask = self.bridge.imgmsg_to_cv2(subtract_part.part_outline.part_mask, subtract_part.part_outline.part_mask.encoding)
                 subtract_part_mask_scaled=self.image_resize(subtract_part_mask,256,256)
                 part_mask_scaled=part_mask_scaled-subtract_part_mask_scaled
-            suck_points = findSuckPoints(part_mask_scaled, width, height, 40, 30)
+            suck_points = self.findSuckPoints(part_mask_scaled, width_scaled, height_scaled, 40, 30)
         else:
             return aff_list
         if len(suck_points)==0:
@@ -97,7 +100,7 @@ class Suckability:
         suck_points_converted=ConvertPixel2WorldRequest()
         for i in range(len(suck_points)):
             suck_point = geometry_msgs.msg.Point()
-            suck_point.y = suck_points[i,0] * img_w/256.0
+            suck_point.y = suck_points[i,0] * img_w/256.0 #todo
             suck_point.x = suck_points[i,1] * img_h/256.0
             suck_point.z = 0
             suck_points_converted.pixels.append(suck_point)
@@ -127,7 +130,7 @@ class Suckability:
             h.stamp = rospy.Time.now()
             h.frame_id=resp.header.frame_id
             marker.header=h
-            marker.ns= "suck_point"
+            marker.ns= "suck_point_"+part.part_id
             marker.id=i
             marker.type= 3 
             marker.action = 0

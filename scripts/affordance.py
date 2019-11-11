@@ -29,7 +29,7 @@ class affordanceWrapper:
         aff=affordance.affordance
         if aff not in self.affordance_list: 
             self.affordance_list.append(aff)
-        self.affordance_funcs[aff]=aff.find_affordance
+        self.affordance_funcs[aff]=affordance.find_affordance
         self.required_parts_for_affordance[aff]=affordance.required_parts_for_affordance
 
 

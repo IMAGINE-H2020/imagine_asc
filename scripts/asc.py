@@ -16,11 +16,13 @@ def main(args):
     screwability=Screwability(('screw','unscrewability','unscrewed'))
     affordance_wrapper.addAffordanceModel(screwability)
 
-    lid_suckablity=Suckability('lid','suckability','suckable',['lid'])
-    magnet_suckablity=Suckability('magnet','suckability','suckable',['magnet'])
-    platter_suckablity=Suckability('platter','suckability','suckable',['platter'])
+    lid_suckablity=Suckability(('lid','suckability','suckable'),['lid'])
+    magnet_suckablity=Suckability(('magnet','suckability','suckable'),['magnet'])
+    platter_suckablity=Suckability(('platter','suckability','suckable'),['platter'])
+    pcb_suckablity=Suckability(('pcb','suckability','suckable'),['pcb'])
 
     affordance_wrapper.addAffordanceModel(lid_suckablity)
+    affordance_wrapper.addAffordanceModel(pcb_suckablity)
     affordance_wrapper.addAffordanceModel(magnet_suckablity)
     affordance_wrapper.addAffordanceModel(platter_suckablity)
 
