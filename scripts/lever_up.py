@@ -139,7 +139,7 @@ class Lever_Up:
             aff.action_parameters_array.append(ap)
         aff_list.append(aff)
         rate=rospy.Rate(10)
-        comp_img=bridge.cv2_to_compressed_imgmsg(affordance_vis_image)
+        comp_img=self.bridge.cv2_to_compressed_imgmsg(affordance_vis_image)
         for _ in range(5):
             self.lever_up_rviz.publish(markerArray)
             self.lever_up_image_viz.publish(comp_img)
