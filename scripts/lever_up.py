@@ -83,7 +83,8 @@ class Lever_Up:
             leverup_points_converted.pixels.append(lever_up_point)
         resp = self.pixel_world_srv(leverup_points_converted)
         affordance_vis_image = cv2.resize(tmp_img,(256,256))
-
+        tmp_img = self.bridge.imgmsg_to_cv2(pcb.part_outline.part_mask, pcb.part_outline.part_mask.encoding)
+        tmp_img = cv2.resize(tmp_img, (256, 256))
         markerArray= MarkerArray()
         for i in range(len(leverup_points)):
             marker= Marker()
@@ -95,14 +96,9 @@ class Lever_Up:
             lever_up_point.value_pose.position.x=resp.points[i].x
             lever_up_point.value_pose.position.y=resp.points[i].y
             lever_up_point.value_pose.position.z=resp.points[i].z
-            if i==0:
-                print(lever_up_point)
-            ind= np.random.randint(0,len(leverup_points))
-            x= leverup_points[ind][0]
-            y= leverup_points[ind][1]
+            x= leverup_points[i][0]
+            y= leverup_points[i][1]
             w_size=9
-            tmp_img = self.bridge.imgmsg_to_cv2(pcb.part_outline.part_mask, pcb.part_outline.part_mask.encoding)
-            tmp_img = cv2.resize(tmp_img, (256, 256)) 
             temp=tmp_img[max(0,x-w_size):min(256,x+w_size),max(0,y-w_size):min(256,y+w_size)]
             x1,y1= np.where(temp==255)
             x2,y2= np.where(temp==0)
