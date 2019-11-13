@@ -56,7 +56,7 @@ class Lever_Up:
     def find_affordance(self,data):
         aff_list=list()
         try:
-            tmp_img = self.bridge.imgmsg_to_cv2(data.assos_img, data.assos_img.encoding)   ##TODO second parameter should be 'rgb8'
+            tmp_img = self.bridge.imgmsg_to_cv2(data.assos_img, 'rgb8')
             tmp_img2=ImageEnhance.Color(Image.fromarray(tmp_img)).enhance(2)
             self.curr_img=image.img_to_array(tmp_img2)
         except CvBridgeError as e:
