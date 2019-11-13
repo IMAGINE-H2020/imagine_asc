@@ -14,13 +14,12 @@ import copy
 from geometry_msgs.msg import TransformStamped,Pose
 import tf2_ros
 import numpy as np
-import rospack
 
 ## Test This
 def comparePosition(leverup_pose,old_pcb_pose, new_pcb_pose):
     ### Lever Up Pose
 
-    buffer_core = tf2_ros.BufferCore(rospy.Duration(1.0))
+    buffer_core = tf2_ros.BufferCore(rospy.Duration(1))
     ts1 = TransformStamped()
     ts1.header.stamp = rospy.Time(0)
     ts1.header.frame_id = 'map'
@@ -30,7 +29,7 @@ def comparePosition(leverup_pose,old_pcb_pose, new_pcb_pose):
     ts1.transform.rotation=leverup_pose.orientation
 
     buffer_core.set_transform(ts1, "default_authority")
-
+    rospack = rospkg.RosPack()
     traj = np.loadtxt(rospack.get_path('imagine_asc') + "/10_10.txt") / 4.
     ### Trajectory
     ts2 = TransformStamped()
@@ -38,7 +37,6 @@ def comparePosition(leverup_pose,old_pcb_pose, new_pcb_pose):
     ts2.header.frame_id = 'frame1'
     ts2.child_frame_id = 'frame2'
 
-    traj[-1,:2]-traj[0,:2]
     ts2.transform.translation.y = 2*(traj[-1,0]-traj[0,0])
     ts2.transform.translation.x = 2*(traj[-1,1]-traj[0,1])
     ts2.transform.rotation.w = 1.0
@@ -56,7 +54,8 @@ class affordanceWrapper:
         self.affordance_funcs = {}
         self.available_parts = []
         self.required_parts_for_affordance = {}
-        self.s = rospy.Service('asc/request_affordances', AffordanceArray, self.requestAffordances)        ##TODO affordances --> production, affordances2 --> debug
+        self.s = rospy.Service('asc/request_affordances', AffordanceArray, self.requestAffordances)
+        self.s2 = rospy.Service('asc/selected_action', EffectMarker, self.handle_action)
         self.affordances_image_rviz = rospy.Publisher('asc/debug/affordances_image/compressed', CompressedImage, queue_size=10)
         self.bridge = CvBridge()
         self.rate = rospy.Rate(10)
@@ -64,6 +63,11 @@ class affordanceWrapper:
         self.old_poses=None
         self.last_action=None
         self.last_action_pose=None
+
+    def handle_action(self,request):
+        self.last_action = request.action_name
+        self.last_action_pose = request.pose
+        return EffectMarkerResponse(True)
 
     def updateDataRequest(self, request):
         self.old_poses = copy.deepcopy(self.curr_poses)
