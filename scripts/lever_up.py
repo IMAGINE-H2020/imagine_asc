@@ -56,7 +56,7 @@ class Lever_Up:
     def find_affordance(self,data):
         aff_list=list()
         try:
-            tmp_img = self.bridge.imgmsg_to_cv2(data.assos_img, data.assos_img.encoding)
+            tmp_img = self.bridge.imgmsg_to_cv2(data.assos_img, data.assos_img.encoding)   ##TODO second parameter should be 'rgb8'
             tmp_img2=ImageEnhance.Color(Image.fromarray(tmp_img)).enhance(2)
             self.curr_img=image.img_to_array(tmp_img2)
         except CvBridgeError as e:
@@ -108,9 +108,9 @@ class Lever_Up:
                 continue
             import tf
             point_inverted = np.array(leverup_points[i][::-1])
-            _ = cv2.arrowedLine(affordance_vis_image, tuple(point_inverted.astype(np.int16)), tuple((point_inverted+[np.sin(direction)*15,np.cos(direction)*15]).astype(np.int16)), (255,0,0), 1, tipLength=0.5)
+            _ = cv2.arrowedLine(affordance_vis_image, tuple(point_inverted.astype(np.int16)), tuple((point_inverted+[np.sin(direction)*15,np.cos(direction)*15]).astype(np.int16)), (0,0,255), 1, tipLength=0.5)
             _ = cv2.arrowedLine(affordanceWrapper.affordance_vis_image, tuple(point_inverted.astype(np.int16)), tuple(
-                (point_inverted + [np.sin(direction) * 15, np.cos(direction) * 15]).astype(np.int16)), (255, 0, 0), 1,
+                (point_inverted + [np.sin(direction) * 15, np.cos(direction) * 15]).astype(np.int16)), (0, 0, 255), 1,
                                 tipLength=0.5)
             quaternion = tf.transformations.quaternion_from_euler(0,0,direction)
             lever_up_point.value_pose.orientation.x=quaternion[0]

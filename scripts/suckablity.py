@@ -84,7 +84,7 @@ class Suckability:
         part_mask_scaled=self.image_resize(part_mask,width_scaled,height_scaled)
 
         if self.affordance[0]=='magnet':
-            suck_points = self.findSuckPoints(part_mask_scaled, width_scaled, height_scaled, 20, 10) ##TODO too small need to make it bigger
+            suck_points = self.findSuckPoints(part_mask_scaled, width_scaled, height_scaled, 20, 20)
         elif self.affordance[0]=='lid' or self.affordance[0]=='pcb':
             suck_points = self.findSuckPoints(part_mask_scaled, width_scaled, height_scaled, 40, 30)
         elif self.affordance[0]=='platter':
@@ -107,7 +107,7 @@ class Suckability:
             suck_points_converted.pixels.append(suck_point)
 
             point_inverted = np.array(suck_points[i,::-1])[1:]
-            cv2.circle(affordanceWrapper.affordance_vis_image, tuple(point_inverted.astype(np.int16)) , 3, (255, 0, 255), -1)
+            cv2.circle(affordanceWrapper.affordance_vis_image, tuple(point_inverted.astype(np.int16)) , 3, (0, 255, 255), -1)
         resp = self.pixel_world_srv(suck_points_converted)
         aff=Affordance()
         aff.object_name=part.part_id

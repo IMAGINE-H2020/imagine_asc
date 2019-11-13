@@ -21,7 +21,7 @@ class affordanceWrapper:
         self.affordance_funcs = {}
         self.available_parts = []
         self.required_parts_for_affordance = {}
-        self.s = rospy.Service('asc/request_affordances2', AffordanceArray, self.requestAffordances)
+        self.s = rospy.Service('asc/request_affordances', AffordanceArray, self.requestAffordances)        ##TODO affordances --> production, affordances2 --> debug
         self.affordances_image_rviz = rospy.Publisher('asc/debug/affordances_image/compressed', CompressedImage, queue_size=10)
         self.bridge = CvBridge()
         self.rate = rospy.Rate(10)
