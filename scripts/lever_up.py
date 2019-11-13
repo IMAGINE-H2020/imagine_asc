@@ -17,6 +17,7 @@ from visualization_msgs.msg import  MarkerArray,Marker
 from keras.preprocessing import image
 from imagine_common.msg import *
 import geometry_msgs.msg
+from affordance import affordanceWrapper
 
 class Lever_Up:
     def __init__(self,affordance,required_parts=[]):
@@ -107,7 +108,10 @@ class Lever_Up:
                 continue
             import tf
             point_inverted = np.array(leverup_points[i][::-1])
-            _ = cv2.arrowedLine(affordance_vis_image, tuple(point_inverted.astype(np.int16)), tuple((point_inverted+[np.sin(direction)*15,np.cos(direction)*15]).astype(np.int16)), (255,0,0), 1, tipLength=0.5)
+            _ = cv2.arrowedLine(affordance_vis_image, tuple(point_inverted.astype(np.int16)), tuple((point_inverted+[np.sin(direction)*15,np.cos(direction)*15]).astype(np.int16)), (0,0,255), 1, tipLength=0.5)
+            _ = cv2.arrowedLine(affordanceWrapper.affordance_vis_image, tuple(point_inverted.astype(np.int16)), tuple(
+                (point_inverted + [np.sin(direction) * 15, np.cos(direction) * 15]).astype(np.int16)), (0, 0, 255), 1,
+                                tipLength=0.5)
             quaternion = tf.transformations.quaternion_from_euler(0,0,direction)
             lever_up_point.value_pose.orientation.x=quaternion[0]
             lever_up_point.value_pose.orientation.y=quaternion[1]

@@ -12,7 +12,8 @@ from imagine_common.srv import *
 from imagine_common.msg import *
 from geometry_msgs.msg import *
 from visualization_msgs.msg import MarkerArray,Marker
-import numpy as np 
+import numpy as np
+from affordance import affordanceWrapper
 
 class Suckability:
     def __init__(self,affordance,required_parts=['lid']):
@@ -83,7 +84,7 @@ class Suckability:
         part_mask_scaled=self.image_resize(part_mask,width_scaled,height_scaled)
 
         if self.affordance[0]=='magnet':
-            suck_points = self.findSuckPoints(part_mask_scaled, width_scaled, height_scaled, 20, 10)
+            suck_points = self.findSuckPoints(part_mask_scaled, width_scaled, height_scaled, 20, 20)
         elif self.affordance[0]=='lid' or self.affordance[0]=='pcb':
             suck_points = self.findSuckPoints(part_mask_scaled, width_scaled, height_scaled, 40, 30)
         elif self.affordance[0]=='platter':
@@ -104,6 +105,9 @@ class Suckability:
             suck_point.x = suck_points[i,1] * img_h/256.0
             suck_point.z = 0
             suck_points_converted.pixels.append(suck_point)
+
+            point_inverted = np.array(suck_points[i,::-1])[1:]
+            cv2.circle(affordanceWrapper.affordance_vis_image, tuple(point_inverted.astype(np.int16)) , 3, (0, 255, 255), -1)
         resp = self.pixel_world_srv(suck_points_converted)
         aff=Affordance()
         aff.object_name=part.part_id
