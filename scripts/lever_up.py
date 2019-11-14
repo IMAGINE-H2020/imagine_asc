@@ -69,7 +69,6 @@ class Lever_Up:
         aff.object_name=pcb.part_id
         img_w = self.curr_img.shape[0]
         img_h = self.curr_img.shape[1]
-        print img_w,img_h 
         aff_mask=self.model.predict(self.curr_img)
 
         leverup_points,confidences=self.sample_leverup_points(aff_mask)
