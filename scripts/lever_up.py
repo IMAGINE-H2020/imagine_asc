@@ -73,9 +73,13 @@ class Lever_Up:
         aff_mask=self.model.predict(self.curr_img)
 
         leverup_points,confidences=self.sample_leverup_points(aff_mask)
+        if len(leverup_points)==0:
+            return aff_list
+        
         aff.effect_name='levered'
         aff.affordance_name='leverable'
         leverup_points_converted=ConvertPixel2WorldRequest()
+
         for i in range(len(leverup_points)):
             lever_up_point = geometry_msgs.msg.Point()
             lever_up_point.y = leverup_points[i][0] * img_w/256.0
