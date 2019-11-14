@@ -12,11 +12,15 @@ import tf
 import numpy as np
 import rospkg
 import sys
-
+import pickle
 effect_publisher = None
+rospack = rospkg.RosPack()
+
+with open(rospack.get_path('imagine_asc') +'predicted_effects.pickle', 'rb') as handle:
+    lever_up_effects = pickle.load(handle)
 
 def handle_effect_marker(req):
-    global effect_publisher
+    global effect_publisher,lever_up_effects
     print "Got a Request."
     request_name = req.action_name
 
@@ -52,13 +56,21 @@ def handle_effect_marker(req):
     if request_name == 'lever':
 
         marker.ns = "lever_up_effect"
-        rospack = rospkg.RosPack()
-        effect = np.loadtxt(rospack.get_path('imagine_asc') + "/10_10.txt") / 2.
+        direction_theta=tf.transformations.euler_from_quaternion([marker.pose.orientation.x,marker.pose.orientation.y, marker.pose.orientation.z, marker.pose.orientation.w])[2]/np.pi*180
+        pcb_size_x=0.09 ## ROSPARAM
+        pcb_size_y=0.05 ## ROSPARAM
+
+        selection_criterias=('no-wall',int((pcb_size_y-0.03)/0.005))
+
+
+        if np.abs(direction_theta)-90 >45:
+            selection_criterias=('wall',int((pcb_size_x-0.05)/0.005))
+        effect = lever_up_effects[selection_criterias]
         for i in range(effect.shape[0]):
             point = Point()
-            point.x = effect[i, 1]
-            point.y = effect[i, 0]
-            point.z = effect[i, 2] - 0.325
+            point.x = effect[i, 0]
+            point.y = effect[i, 1]
+            point.z = effect[i, 2]
             marker.points.append(point)
 
     elif request_name == 'suck' or request_name == 'unscrew':
