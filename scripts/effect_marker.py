@@ -19,6 +19,10 @@ def handle_effect_marker(req):
     global effect_publisher
     print "Got a Request."
     request_name = req.action_name
+
+    if request_name not in ['lever','suck','unscrew']:
+        return EffectMarkerResponse(False)
+
     marker = Marker()
     marker.pose.position.x = req.pose.position.x  # 0.7
     marker.pose.position.y = req.pose.position.y  # 0.4
