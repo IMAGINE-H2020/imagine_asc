@@ -141,7 +141,7 @@ class Suckability:
             marker.scale.x=0.01
             marker.scale.y=0.001
             marker.scale.z=0.002
-            marker.lifetime = rospy.Duration(90)
+            marker.lifetime = rospy.Duration(150)
             marker.color.r=1.0
             marker.color.g=1.0
             marker.color.b=0.0
