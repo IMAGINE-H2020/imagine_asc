@@ -56,7 +56,7 @@ class Screwability:
                 marker.scale.x=0.005
                 marker.scale.y=0.005
                 marker.scale.z=0.005
-                marker.lifetime = rospy.Duration(90)
+                marker.lifetime = rospy.Duration(150)
                 marker.color.r=0.0
                 marker.color.g=0.0
                 marker.color.b=1.0

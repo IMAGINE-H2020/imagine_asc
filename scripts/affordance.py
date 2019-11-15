@@ -14,11 +14,18 @@ import copy
 from geometry_msgs.msg import TransformStamped,Pose
 import tf2_ros
 import numpy as np
+import pickle
+
+rospack = rospkg.RosPack()
+
+with open(rospack.get_path('imagine_asc') +'/predicted_effects.pickle', 'rb') as handle:
+    lever_up_effects = pickle.load(handle)
 
 ## Test This
 def comparePosition(leverup_pose,old_pcb_pose, new_pcb_pose):
     ### Lever Up Pose
-
+    import tf
+    global lever_up_effects
     buffer_core = tf2_ros.BufferCore(rospy.Duration(1))
     ts1 = TransformStamped()
     ts1.header.stamp = rospy.Time(0)
@@ -26,19 +33,47 @@ def comparePosition(leverup_pose,old_pcb_pose, new_pcb_pose):
     ts1.child_frame_id = 'frame1'
     ts1.transform.translation=old_pcb_pose.position
 
-    ts1.transform.rotation=leverup_pose.orientation
+    direction_theta = tf.transformations.euler_from_quaternion(
+        [leverup_pose.orientation.x, leverup_pose.orientation.y, leverup_pose.orientation.z, leverup_pose.orientation.w])[
+                          2] / np.pi * 180
+    if np.abs(direction_theta + 90) <= 45:
+        direction = 0
+    elif direction_theta + 90 < -45:
+        direction = -np.pi / 2
+    elif direction_theta + 90 > 45:
+        direction = np.pi / 2
+    quaternion = tf.transformations.quaternion_from_euler(0, 0, direction)
+
+    ts1.transform.rotation.x = quaternion[0]  # 0
+    ts1.transform.rotation.y = quaternion[1]  # 0
+    ts1.transform.rotation.z = quaternion[2]  # 0
+    ts1.transform.rotation.w = quaternion[3]  # 1.0
 
     buffer_core.set_transform(ts1, "default_authority")
     rospack = rospkg.RosPack()
-    traj = np.loadtxt(rospack.get_path('imagine_asc') + "/10_10.txt") / 4.
-    ### Trajectory
+
+    import tf
+    direction_theta=tf.transformations.euler_from_quaternion([leverup_pose.orientation.x,leverup_pose.orientation.y, leverup_pose.orientation.z, leverup_pose.orientation.w])[2]/np.pi*180
+
+    pcb_bounding_values = rospy.get_param('pcb_bounding_values')
+    pcb_size_x = pcb_bounding_values[0]  ## ROSPARAM
+    pcb_size_y = pcb_bounding_values[1]  ## ROSPARAM
+
+
+    selection_criterias = ('no-wall', max(0, min(9, int((pcb_size_y - 0.03) / 0.005))))
+
+    if np.abs(direction_theta + 90) > 45:
+        selection_criterias = ('wall', max(0, min(6, int((pcb_size_x - 0.05) / 0.005))))
+    effect = lever_up_effects[selection_criterias]    ### Trajectory
+
+
     ts2 = TransformStamped()
     ts2.header.stamp = rospy.Time(0)
     ts2.header.frame_id = 'frame1'
     ts2.child_frame_id = 'frame2'
 
-    ts2.transform.translation.y = 2*(traj[-1,0]-traj[0,0])
-    ts2.transform.translation.x = 2*(traj[-1,1]-traj[0,1])
+    ts2.transform.translation.y = (effect[-1,0]-effect[0,0])
+    ts2.transform.translation.x = (effect[-1,1]-effect[0,1])
     ts2.transform.rotation.w = 1.0
     buffer_core.set_transform(ts2, "default_authority")
 
