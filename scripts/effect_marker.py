@@ -16,7 +16,7 @@ import pickle
 effect_publisher = None
 rospack = rospkg.RosPack()
 
-with open(rospack.get_path('imagine_asc') +'predicted_effects.pickle', 'rb') as handle:
+with open(rospack.get_path('imagine_asc') +'/predicted_effects.pickle', 'rb') as handle:
     lever_up_effects = pickle.load(handle)
 
 def handle_effect_marker(req):
@@ -47,7 +47,7 @@ def handle_effect_marker(req):
     marker.scale.x = 0.005
     marker.scale.y = 0.005
     marker.scale.z = 0.005
-    marker.lifetime = rospy.Duration(90)
+    marker.lifetime = rospy.Duration(150)
     marker.color.r = 0.0
     marker.color.g = 1.0
     marker.color.b = 0.0
@@ -57,14 +57,27 @@ def handle_effect_marker(req):
 
         marker.ns = "lever_up_effect"
         direction_theta=tf.transformations.euler_from_quaternion([marker.pose.orientation.x,marker.pose.orientation.y, marker.pose.orientation.z, marker.pose.orientation.w])[2]/np.pi*180
-        pcb_size_x=0.09 ## ROSPARAM
-        pcb_size_y=0.05 ## ROSPARAM
+        if np.abs(direction_theta + 90) <= 45:
+            direction=0
+        elif direction_theta + 90 < -45:
+            direction=-np.pi/2
+        elif direction_theta + 90 > 45:
+            direction=np.pi/2
+        quaternion = tf.transformations.quaternion_from_euler(0, 0, direction)
 
-        selection_criterias=('no-wall',int((pcb_size_y-0.03)/0.005))
+        marker.pose.orientation.x = quaternion[0]  # 0
+        marker.pose.orientation.y = quaternion[1]  # 0
+        marker.pose.orientation.z = quaternion[2]  # 0
+        marker.pose.orientation.w = quaternion[3]  # 1.0
 
+        pcb_bounding_values = rospy.get_param('pcb_bounding_values')
+        pcb_size_x = pcb_bounding_values[0]  ## ROSPARAM
+        pcb_size_y = pcb_bounding_values[1]  ## ROSPARAM
 
-        if np.abs(direction_theta)-90 >45:
-            selection_criterias=('wall',int((pcb_size_x-0.05)/0.005))
+        selection_criterias=('no-wall',max(0,min(9,int((pcb_size_y-0.03)/0.005))))
+
+        if np.abs(direction_theta+90) >45:
+            selection_criterias=('wall',max(0,min(6,int((pcb_size_x-0.05)/0.005))))
         effect = lever_up_effects[selection_criterias]
         for i in range(effect.shape[0]):
             point = Point()
@@ -81,7 +94,7 @@ def handle_effect_marker(req):
             point = Point()
             point.x = effect[i, 0]
             point.y = effect[i, 1]
-            point.z = effect[i, 2] + 0.05
+            point.z = effect[i, 2] + 0.03
             marker.points.append(point)
 
     rate = rospy.Rate(100)

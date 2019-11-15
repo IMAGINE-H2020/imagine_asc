@@ -53,6 +53,24 @@ class Lever_Up:
 
         return leverup_points_to_send,confidence_to_send
 
+    def returnPcbBoundingValues(self,pcb):
+        minx = np.inf
+        maxx = -np.inf
+        miny = np.inf
+        maxy = -np.inf
+
+        for pose in pcb.part_outline.outline_poses.poses:
+            if pose.position.x < minx:
+                minx = pose.position.x
+            if pose.position.y < miny:
+                miny = pose.position.y
+            if pose.position.x > maxx:
+                maxx = pose.position.x
+            if pose.position.y > maxy:
+                maxy = pose.position.y
+
+        return [maxx - minx, maxy - miny]
+
     def find_affordance(self,data):
         aff_list=list()
         try:
@@ -67,6 +85,10 @@ class Lever_Up:
                 pcb=part   
         aff=Affordance()
         aff.object_name=pcb.part_id
+
+        pcb_bounding_values = self.returnPcbBoundingValues(pcb)
+        rospy.set_param('pcb_bounding_values', pcb_bounding_values)
+
         img_w = self.curr_img.shape[0]
         img_h = self.curr_img.shape[1]
         aff_mask=self.model.predict(self.curr_img)
