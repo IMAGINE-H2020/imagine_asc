@@ -16,8 +16,11 @@ import pickle
 effect_publisher = None
 rospack = rospkg.RosPack()
 
-with open(rospack.get_path('imagine_asc') +'/predicted_effects.pickle', 'rb') as handle:
-    lever_up_effects = pickle.load(handle)
+# TODO: Test this.
+from lever_up_pn.lever_up_effect import Lever_Up_Effect
+lev_up = Lever_Up_Effect()
+#with open(rospack.get_path('imagine_asc') +'/predicted_effects.pickle', 'rb') as handle:
+#    lever_up_effects = pickle.load(handle)
 
 def handle_effect_marker(req):
     global effect_publisher,lever_up_effects
@@ -74,11 +77,12 @@ def handle_effect_marker(req):
         pcb_size_x = pcb_bounding_values[0]  ## ROSPARAM
         pcb_size_y = pcb_bounding_values[1]  ## ROSPARAM
 
-        selection_criterias=('no-wall',max(0,min(9,int((pcb_size_y-0.03)/0.005))))
+        #selection_criterias=('no-wall',max(0,min(9,int((pcb_size_y-0.03)/0.005))))
 
-        if np.abs(direction_theta+90) >45:
-            selection_criterias=('wall',max(0,min(6,int((pcb_size_x-0.05)/0.005))))
-        effect = lever_up_effects[selection_criterias]
+        #if np.abs(direction_theta+90) >45:
+        #    selection_criterias=('wall',max(0,min(6,int((pcb_size_x-0.05)/0.005))))
+
+        effect = lev_up.get_pcb_trajectory(pcb_size_x,pcb_size_y,direction_theta) #lever_up_effects[selection_criterias]
         for i in range(effect.shape[0]):
             point = Point()
             point.x = effect[i, 0]
