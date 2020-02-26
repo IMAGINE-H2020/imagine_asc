@@ -3,6 +3,11 @@ from DatasetLoader import MyDataset
 import pickle
 from Networks import *
 from scipy.spatial.transform import Rotation as R
+import rospkg
+from keras import backend as K
+
+
+rospack = rospkg.RosPack()
 
 def find_bbox(shapes):
     
@@ -48,15 +53,27 @@ def qfix(q):
 
 class Lever_Up_Effect:
     def __init__(self):
-        with open('lev_up_scaler.pickle', 'r') as handle:
+        
+        config = tf.ConfigProto()
+
+        config.gpu_options.allow_growth = True
+        config.gpu_options.per_process_gpu_memory_fraction = 0.6
+
+        self.session = tf.Session(config=config)
+
+        K.set_session(self.session)
+
+
+        with open(rospack.get_path('imagine_asc') +'/scripts/lever_up_pn/lev_up_scaler.pickle', 'r') as handle:
             scaler = pickle.load(handle)
         Pns= PropagationNetwork()
         Pn=Pns.getModel(7)    
-        Pn.load_weights('lev_up_weights.hdf5')
+        Pn.load_weights(rospack.get_path('imagine_asc') +'/scripts/lever_up_pn/lev_up_weights.hdf5')
+        Pn._make_predict_function()
         self.Pn=Pn
-        self.lev_up_wall_trajs=MyDataset(PATH='trajectories/lev_up_wall/',
+        self.lev_up_wall_trajs=MyDataset(PATH=rospack.get_path('imagine_asc') +'/scripts/lever_up_pn/trajectories/lev_up_wall/',
                                          n_of_traj=10,diff_ts=10,start_index=0,SCALER=scaler)
-        self.lev_up_nowall_trajs=MyDataset(PATH='trajectories/lev_up_no_wall/',
+        self.lev_up_nowall_trajs=MyDataset(PATH=rospack.get_path('imagine_asc') +'/scripts/lever_up_pn/trajectories/lev_up_no_wall/',
                                          n_of_traj=10,diff_ts=10,start_index=0,SCALER=scaler)
     def predict_effect(self,dataset):
         PN=self.Pn

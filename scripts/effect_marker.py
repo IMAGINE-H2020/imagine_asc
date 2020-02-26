@@ -83,6 +83,7 @@ def handle_effect_marker(req):
         #    selection_criterias=('wall',max(0,min(6,int((pcb_size_x-0.05)/0.005))))
 
         effect = lev_up.get_pcb_trajectory(pcb_size_x,pcb_size_y,direction_theta) #lever_up_effects[selection_criterias]
+        effect = effect - effect[0]
         for i in range(effect.shape[0]):
             point = Point()
             point.x = effect[i, 0]

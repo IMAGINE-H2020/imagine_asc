@@ -16,6 +16,8 @@ import tf2_ros
 import numpy as np
 import pickle
 
+#TODO test cache functionality
+
 rospack = rospkg.RosPack()
 
 with open(rospack.get_path('imagine_asc') +'/predicted_effects.pickle', 'rb') as handle:
@@ -90,6 +92,9 @@ class affordanceWrapper:
         self.available_parts = []
         self.required_parts_for_affordance = {}
         self.s = rospy.Service('asc/request_affordances', AffordanceArray, self.requestAffordances)
+
+        self.s_cache = rospy.Service('asc/cached/request_affordances', AffordanceArray, self.requestAffordancesCached)
+
         self.s2 = rospy.Service('asc/selected_action', EffectMarker, self.handle_action)
         self.affordances_image_rviz = rospy.Publisher('asc/debug/affordances_image/compressed', CompressedImage, queue_size=10)
         self.bridge = CvBridge()
@@ -98,6 +103,7 @@ class affordanceWrapper:
         self.old_poses=None
         self.last_action=None
         self.last_action_pose=None
+        self.aff_arr_resp=AffordanceArrayResponse()
 
     def handle_action(self,request):
         self.last_action = request.action_name
@@ -123,6 +129,10 @@ class affordanceWrapper:
             self.affordance_list.append(aff)
         self.affordance_funcs[aff] = affordance.find_affordance
         self.required_parts_for_affordance[aff] = affordance.required_parts_for_affordance
+
+
+    def requestAffordancesCached(self,request):
+        return self.aff_arr_resp
 
     def requestAffordances(self, request):
         self.updateDataRequest(request)
@@ -153,4 +163,5 @@ class affordanceWrapper:
             self.affordances_image_rviz.publish(affordanceWrapper.comp_img)
             self.rate.sleep()
 
+        self.aff_arr_resp = aff_arr_resp
         return aff_arr_resp

@@ -12,6 +12,16 @@ import rospkg
 import cv2
 class unetmodel:
     def __init__(self,model_name):
+
+        config = tf.ConfigProto()
+
+        config.gpu_options.allow_growth = True
+        config.gpu_options.per_process_gpu_memory_fraction = 0.6
+
+        self.session = tf.Session(config=config)
+
+        keras.set_session(self.session)
+
         def unet(input_sizes,input_names,output_names,filter_sizes,target=(256,256),pretrained_weights=None):
             inputs_list=list()
             for input_ind in range(len(input_sizes)): 

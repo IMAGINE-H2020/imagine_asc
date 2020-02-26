@@ -1,7 +1,7 @@
 import os
 import pickle
 import numpy as np
-from tqdm import tqdm
+#from tqdm import tqdm
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 import json
@@ -86,7 +86,8 @@ class MyDataset:
             self.data[scene_ind,:traj_len,obj_ind:,3:7]=[0,0,0,1]
             self.data[scene_ind,traj_len-1:,:,3:7]=[0,0,0,1]            
             cnt=0
-        map(getScene,tqdm(range(self.n_of_traj)))
+        #map(getScene,tqdm(range(self.n_of_traj)))
+        map(getScene,range(self.n_of_traj))
         self.data[:,1:,:,13:16]=self.data[:,1:,:,:3]-self.data[:,:-1,:,:3]        
         self.data[:,0,:,16:20]=[0,0,0,1]
         #self.data[:,1:,:,16:20]=self.data[:,:-1,:,3:7]
