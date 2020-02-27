@@ -24,7 +24,10 @@ class Screwability:
         no = 0
         for part in data.part_array:
             partname=part.part_id[:-1]
-            if partname=='screw' or partname=='bearing':
+
+            #TODO check this
+            #if partname=='screw' or partname=='bearing':
+            if partname=='screw':
                 marker= Marker()
                 aff=Affordance()
                 aff.object_name=part.part_id
@@ -32,7 +35,7 @@ class Screwability:
                 aff.affordance_name='unscrewability'
                 ap= ActionParameters()
                 if (partname == 'bearing'):
-                    ap.confidence = part.part_type_specifics_confidence  
+                    ap.confidence =  1 - part.part_type_specifics_confidence  
                 else:
                     ap.confidence = part.part_type_confidence                                      
                 asc_pair =AscPair()

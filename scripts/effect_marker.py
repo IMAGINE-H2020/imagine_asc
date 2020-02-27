@@ -113,7 +113,7 @@ def effect_marker_server():
     global effect_publisher
     rospy.init_node('effect_marker_server')
     s = rospy.Service('effect_marker', EffectMarker, handle_effect_marker)
-    effect_publisher = rospy.Publisher('/asc/lever_up_effect', Marker, queue_size=10)
+    effect_publisher = rospy.Publisher('asc/lever_up_effect', Marker, queue_size=10)
 
     print "Effect Marker is ready."
     rospy.spin()
