@@ -55,14 +55,14 @@ class Cut:
 
     def find_affordance(self, data):
         aff_list=list()
-        except CvBridgeError as e:
-            print(e)
         for part in data.part_array:
             partname=part.part_id[:-1]
             if partname=='segment':
                 cable=part
         try:
             self.curr_img = self.bridge.imgmsg_to_cv2(cable.part_outline.part_mask, cable.part_outline.part_mask.encoding)
+        except CvBridgeError as e:
+            print(e)
         aff=Affordance()
         aff.object_name=cable.part_id
 

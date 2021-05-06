@@ -10,7 +10,7 @@ from screwability import *
 from suckablity import *
 from cut import *
 from lever_up import *
-from Push import *
+from push import *
 def main(args):
     rospy.init_node('asc')
     affordance_wrapper = affordanceWrapper()
@@ -40,6 +40,7 @@ def main(args):
     affordance_wrapper.addAffordanceModel(pushablity)
 
     ##########################################################
+    print("ASC READY")
     rospy.spin()
 if __name__ == '__main__':
     main(sys.argv)

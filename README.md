@@ -8,7 +8,7 @@ This repo includes the nodes of ASC module. ASC module is responsible for detect
 
 * Some of the scripts require weights learned after training. The weigths should be put inside folder named "weights" in the imagine_asc folder. These weights are available [here](https://drive.google.com/drive/folders/1vaPicIv9qmm_K3UOmeH0jeA8NSt1y6Zm?usp=sharing)
 
-* **Additional Libraries** : [Numpy](http://www.numpy.org/), [Tensorflow](https://www.tensorflow.org/), [Keras](https://www.tensorflow.org/), [cv2 and cv_bridge](http://wiki.ros.org/opencv2), [skimage](http://scikit-image.org/docs/dev/api/skimage.html) and [vision_msgs](http://wiki.ros.org/vision_msgs). 
+* **Additional Libraries** : [Numpy](http://www.numpy.org/), [Tensorflow](https://www.tensorflow.org/)==1.15, [Keras](https://www.tensorflow.org/)==2.2.4, [cv2 and cv_bridge](http://wiki.ros.org/opencv2), [skimage](http://scikit-image.org/docs/dev/api/skimage.html) and [vision_msgs](http://wiki.ros.org/vision_msgs). 
 
 # Installation
 No installation is needed to run this module.

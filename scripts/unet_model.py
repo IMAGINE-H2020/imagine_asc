@@ -69,12 +69,12 @@ class unetmodel:
                         ['mask0'],
                         [64,128,256,512,1024])
         else:
-            self.model = unet([(256,256,3)],
+            self.model = unet([(256,256,1)],
                         ['mask'],
                         ['aff'],
                         [64,128,256,512,1024])            
         rospack = rospkg.RosPack()
-        self.model_name == model_name
+        self.model_name = model_name
         self.model.load_weights(os.path.join(rospack.get_path('imagine_asc'),'weights/'+model_name+'.hdf5'))
         self.model._make_predict_function()
     def predict(self,img):
