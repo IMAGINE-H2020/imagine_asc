@@ -1,4 +1,3 @@
  <launch>
  	<node pkg="imagine_asc" type="no_asc.py" name="asc" output="screen"/>
- 	<node pkg="imagine_asc" type="effect_marker.py" name="effect_marker" output="screen"/>
  </launch>
