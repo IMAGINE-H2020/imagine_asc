@@ -63,18 +63,27 @@ class unetmodel:
             model = Model(inputs = inputs_list, outputs = output)
 
             return model
-        self.model = unet([(256,256,3)],
-                    ['img'],
-                    ['mask0'],
-                    [64,128,256,512,1024])
+        if model_name == "unet_lever_up":
+            self.model = unet([(256,256,3)],
+                        ['img'],
+                        ['mask0'],
+                        [64,128,256,512,1024])
+        else:
+            self.model = unet([(256,256,3)],
+                        ['mask'],
+                        ['aff'],
+                        [64,128,256,512,1024])            
         rospack = rospkg.RosPack()
-
+        self.model_name == model_name
         self.model.load_weights(os.path.join(rospack.get_path('imagine_asc'),'weights/'+model_name+'.hdf5'))
         self.model._make_predict_function()
     def predict(self,img):
         
         resized_image = cv2.resize(img, (256, 256))
-        result = self.model.predict({'img':resized_image.reshape(-1,256,256,3)/255.0})
+        if self.model_name == "unet_lever_up":
+            result = self.model.predict({'img':resized_image.reshape(-1,256,256,3)/255.0})
+        else:
+            result = self.model.predict({'mask':resized_image.reshape(-1,256,256,3)/255.0})
 
         aff_masks=result.reshape(256,256)*255
         aff_masks[aff_masks>100]=255

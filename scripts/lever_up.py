@@ -73,104 +73,121 @@ class Lever_Up:
 
     def find_affordance(self,data):
         aff_list=list()
-        try:
-            tmp_img = self.bridge.imgmsg_to_cv2(data.assos_img, 'rgb8')
-            tmp_img2=ImageEnhance.Color(Image.fromarray(tmp_img)).enhance(2)
-            self.curr_img=image.img_to_array(tmp_img2)
-        except CvBridgeError as e:
-            print(e)
-        for part in data.part_array:
-            partname=part.part_id[:-1]
-            if partname=='pcb':
-                pcb=part   
-        aff=Affordance()
-        aff.object_name=pcb.part_id
+        if self.affordance[0]=='pcb':
+            try:
+                tmp_img = self.bridge.imgmsg_to_cv2(data.assos_img, 'rgb8')
+                tmp_img2=ImageEnhance.Color(Image.fromarray(tmp_img)).enhance(2)
+                self.curr_img=image.img_to_array(tmp_img2)
+            except CvBridgeError as e:
+                print(e)
+            for part in data.part_array:
+                partname=part.part_id[:-1]
+                if partname=='pcb':
+                    pcb=part   
+            aff=Affordance()
+            aff.object_name=pcb.part_id
 
-        pcb_bounding_values = self.returnPcbBoundingValues(pcb)
-        rospy.set_param('pcb_bounding_values', pcb_bounding_values)
+            pcb_bounding_values = self.returnPcbBoundingValues(pcb)
+            rospy.set_param('pcb_bounding_values', pcb_bounding_values)
 
-        img_w = self.curr_img.shape[0]
-        img_h = self.curr_img.shape[1]
-        aff_mask=self.model.predict(self.curr_img)
+            img_w = self.curr_img.shape[0]
+            img_h = self.curr_img.shape[1]
+            aff_mask=self.model.predict(self.curr_img)
 
-        leverup_points,confidences=self.sample_leverup_points(aff_mask)
-        if len(leverup_points)==0:
-            return aff_list
-        
-        aff.effect_name='levered'
-        aff.affordance_name='leverable'
-        leverup_points_converted=ConvertPixel2WorldRequest()
+            leverup_points,confidences=self.sample_leverup_points(aff_mask)
+            if len(leverup_points)==0:
+                return aff_list
+            
+            aff.effect_name='levered'
+            aff.affordance_name='leverable'
+            leverup_points_converted=ConvertPixel2WorldRequest()
 
-        for i in range(len(leverup_points)):
-            lever_up_point = geometry_msgs.msg.Point()
-            lever_up_point.y = leverup_points[i][0] * img_w/256.0
-            lever_up_point.x = leverup_points[i][1] * img_h/256.0
-            lever_up_point.z = 0
-            leverup_points_converted.pixels.append(lever_up_point)
-        resp = self.pixel_world_srv(leverup_points_converted)
-        affordance_vis_image = cv2.resize(tmp_img,(256,256))
-        tmp_img = self.bridge.imgmsg_to_cv2(pcb.part_outline.part_mask, pcb.part_outline.part_mask.encoding)
-        tmp_img = cv2.resize(tmp_img, (256, 256))
-        markerArray= MarkerArray()
-        for i in range(len(leverup_points)):
-            marker= Marker()
-            ap= ActionParameters()
-            ap.confidence=confidences[i]
-            lever_up_point =AscPair()
-            lever_up_point.key = 'start_pose'
-            lever_up_point.value_type = 2
-            lever_up_point.value_pose.position.x=resp.points[i].x
-            lever_up_point.value_pose.position.y=resp.points[i].y
-            lever_up_point.value_pose.position.z=resp.points[i].z
-            x= leverup_points[i][0]
-            y= leverup_points[i][1]
-            w_size=9
-            temp=tmp_img[max(0,x-w_size):min(256,x+w_size),max(0,y-w_size):min(256,y+w_size)]
-            x1,y1= np.where(temp==255)
-            x2,y2= np.where(temp==0)
-            direction =math.pi + math.atan2(np.mean(y2)-np.mean(y1),np.mean(x2)-np.mean(x1))
-            if len(y2)==0 or len(y1)==0 or len(x2)==0 or len(x1)==0 or np.isnan(direction) or np.isinf(direction):
-                continue
-            import tf
-            point_inverted = np.array(leverup_points[i][::-1])
-            _ = cv2.arrowedLine(affordance_vis_image, tuple(point_inverted.astype(np.int16)), tuple((point_inverted+[np.sin(direction)*15,np.cos(direction)*15]).astype(np.int16)), (0,0,255), 1, tipLength=0.5)
-            _ = cv2.arrowedLine(affordanceWrapper.affordance_vis_image, tuple(point_inverted.astype(np.int16)), tuple(
-                (point_inverted + [np.sin(direction) * 15, np.cos(direction) * 15]).astype(np.int16)), (0, 0, 255), 1,
-                                tipLength=0.5)
-            quaternion = tf.transformations.quaternion_from_euler(0,0,direction)
-            lever_up_point.value_pose.orientation.x=quaternion[0]
-            lever_up_point.value_pose.orientation.y=quaternion[1]
-            lever_up_point.value_pose.orientation.z=quaternion[2]
-            lever_up_point.value_pose.orientation.w=quaternion[3]
+            for i in range(len(leverup_points)):
+                lever_up_point = geometry_msgs.msg.Point()
+                lever_up_point.y = leverup_points[i][0] * img_w/256.0
+                lever_up_point.x = leverup_points[i][1] * img_h/256.0
+                lever_up_point.z = 0
+                leverup_points_converted.pixels.append(lever_up_point)
+            resp = self.pixel_world_srv(leverup_points_converted)
+            affordance_vis_image = cv2.resize(tmp_img,(256,256))
+            tmp_img = self.bridge.imgmsg_to_cv2(pcb.part_outline.part_mask, pcb.part_outline.part_mask.encoding)
+            tmp_img = cv2.resize(tmp_img, (256, 256))
+            markerArray= MarkerArray()
+            for i in range(len(leverup_points)):
+                marker= Marker()
+                ap= ActionParameters()
+                ap.confidence=confidences[i]
+                lever_up_point =AscPair()
+                lever_up_point.key = 'start_pose'
+                lever_up_point.value_type = 2
+                lever_up_point.value_pose.position.x=resp.points[i].x
+                lever_up_point.value_pose.position.y=resp.points[i].y
+                lever_up_point.value_pose.position.z=resp.points[i].z
+                x= leverup_points[i][0]
+                y= leverup_points[i][1]
+                w_size=9
+                temp=tmp_img[max(0,x-w_size):min(256,x+w_size),max(0,y-w_size):min(256,y+w_size)]
+                x1,y1= np.where(temp==255)
+                x2,y2= np.where(temp==0)
+                direction =math.pi + math.atan2(np.mean(y2)-np.mean(y1),np.mean(x2)-np.mean(x1))
+                if len(y2)==0 or len(y1)==0 or len(x2)==0 or len(x1)==0 or np.isnan(direction) or np.isinf(direction):
+                    continue
+                import tf
+                point_inverted = np.array(leverup_points[i][::-1])
+                _ = cv2.arrowedLine(affordance_vis_image, tuple(point_inverted.astype(np.int16)), tuple((point_inverted+[np.sin(direction)*15,np.cos(direction)*15]).astype(np.int16)), (0,0,255), 1, tipLength=0.5)
+                _ = cv2.arrowedLine(affordanceWrapper.affordance_vis_image, tuple(point_inverted.astype(np.int16)), tuple(
+                    (point_inverted + [np.sin(direction) * 15, np.cos(direction) * 15]).astype(np.int16)), (0, 0, 255), 1,
+                                    tipLength=0.5)
+                quaternion = tf.transformations.quaternion_from_euler(0,0,direction)
+                lever_up_point.value_pose.orientation.x=quaternion[0]
+                lever_up_point.value_pose.orientation.y=quaternion[1]
+                lever_up_point.value_pose.orientation.z=quaternion[2]
+                lever_up_point.value_pose.orientation.w=quaternion[3]
 
-            ap.parameters.append(lever_up_point)
-            h = std_msgs.msg.Header()
-            h.stamp = rospy.Time.now()
-            h.frame_id=resp.header.frame_id
-            marker.header=h
-            marker.ns= "lever_up_points"
-            marker.id=i
-            marker.type= 0 # arrow
-            marker.action = 0
-            marker.scale.x=0.01
-            marker.scale.y=0.001
-            marker.scale.z=0.002
-            marker.lifetime = rospy.Duration(150)
-            marker.color.r=1.0
-            marker.color.g=0.0
-            marker.color.b=0.0
-            marker.color.a=1.0
-            marker.pose=lever_up_point.value_pose   
-            markerArray.markers.append(marker)
-            aff.action_parameters_array.append(ap)
-        aff_list.append(aff)
-        rate=rospy.Rate(10)
-        comp_img=self.bridge.cv2_to_compressed_imgmsg(affordance_vis_image)
-        for _ in range(5):
-            self.lever_up_rviz.publish(markerArray)
-            self.lever_up_image_viz.publish(comp_img)
-            rate.sleep()
+                ap.parameters.append(lever_up_point)
+                h = std_msgs.msg.Header()
+                h.stamp = rospy.Time.now()
+                h.frame_id=resp.header.frame_id
+                marker.header=h
+                marker.ns= "lever_up_points"
+                marker.id=i
+                marker.type= 0 # arrow
+                marker.action = 0
+                marker.scale.x=0.01
+                marker.scale.y=0.001
+                marker.scale.z=0.002
+                marker.lifetime = rospy.Duration(150)
+                marker.color.r=1.0
+                marker.color.g=0.0
+                marker.color.b=0.0
+                marker.color.a=1.0
+                marker.pose=lever_up_point.value_pose   
+                markerArray.markers.append(marker)
+                aff.action_parameters_array.append(ap)
+            aff_list.append(aff)
+            rate=rospy.Rate(10)
+            comp_img=self.bridge.cv2_to_compressed_imgmsg(affordance_vis_image)
+            for _ in range(5):
+                self.lever_up_rviz.publish(markerArray)
+                self.lever_up_image_viz.publish(comp_img)
+                rate.sleep()
+        elif self.affordance[0]=='magnet':
+            for part in data.part_array:
+                partname = part.part_id[:-1]
+                if partname == 'magnet':
+                    aff = Affordance()
+                    aff.object_name = part.part_id
+                    aff.effect_name = 'levered'
+                    aff.affordance_name = 'leverable'
 
-
+                    ap= ActionParameters()
+                    ap.confidence =  0.8 # Dummy Value                                     
+                    asc_pair = AscPair()
+                    asc_pair.key = 'start_pose'
+                    asc_pair.value_type = 2
+                    asc_pair.value_pose = part.pose
+                    ap.parameters.append(asc_pair)
+                    aff.action_parameters_array.append(ap)
+                    aff_list.append(aff)
         return aff_list
 

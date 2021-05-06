@@ -108,6 +108,7 @@ class affordanceWrapper:
     def handle_action(self,request):
         self.last_action = request.action_name
         self.last_action_pose = request.pose
+        self.last_part = request.part_id[:-1]
         return EffectMarkerResponse(True)
 
     def updateDataRequest(self, request):
@@ -138,7 +139,7 @@ class affordanceWrapper:
         self.updateDataRequest(request)
 
         #### Mismatch Check
-        if self.last_action=='lever':
+        if self.last_action=='lever' and self.last_part=='pcb':
             action_success=True
             if 'pcb' in self.curr_poses.keys():
                 position_diff = comparePosition(self.last_action_pose,self.old_poses['pcb'],self.curr_poses['pcb'])

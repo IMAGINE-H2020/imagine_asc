@@ -8,7 +8,9 @@ import rospkg
 from affordance import affordanceWrapper
 from screwability import *
 from suckablity import *
+from cut import *
 from lever_up import *
+from Push import *
 def main(args):
     rospy.init_node('asc')
     affordance_wrapper = affordanceWrapper()
@@ -26,8 +28,16 @@ def main(args):
     affordance_wrapper.addAffordanceModel(magnet_suckablity)
     affordance_wrapper.addAffordanceModel(platter_suckablity)
 
-    leverability=Lever_Up(('pcb','leverability','leverable'),['pcb'])
-    affordance_wrapper.addAffordanceModel(leverability)
+    pcb_leverability=Lever_Up(('pcb','leverability','leverable'),['pcb'])
+    magnet_leverability=Lever_Up(('magnet','leverability','leverable'),['magnet'])
+    affordance_wrapper.addAffordanceModel(pcb_leverability)
+    affordance_wrapper.addAffordanceModel(magnet_leverability)
+
+    cuttability=Cut(('segment','cuttability','cuttable'),['segment'])
+    affordance_wrapper.addAffordanceModel(cuttability)
+
+    pushablity = Push(("spindle_hub", 'pushability', 'pushable'),['spindle_hub'])
+    affordance_wrapper.addAffordanceModel(pushablity)
 
     ##########################################################
     rospy.spin()
