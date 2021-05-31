@@ -83,7 +83,7 @@ class unetmodel:
         if self.model_name == "unet_lever_up":
             result = self.model.predict({'img':resized_image.reshape(-1,256,256,3)/255.0})
         else:
-            result = self.model.predict({'mask':resized_image.reshape(-1,256,256,3)/255.0})
+            result = self.model.predict({'mask':resized_image.reshape(-1,256,256)/255.0})
 
         aff_masks=result.reshape(256,256)*255
         aff_masks[aff_masks>100]=255
