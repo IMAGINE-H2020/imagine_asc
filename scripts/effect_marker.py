@@ -29,7 +29,8 @@ def handle_effect_marker(req):
 
     if request_name not in ['lever','suck','unscrew']:
         return EffectMarkerResponse(False)
-
+    if request_name == 'lever' and req.part_id[:-1] !='pcb':
+        return EffectMarkerResponse(False)
     marker = Marker()
     marker.pose.position.x = req.pose.position.x  # 0.7
     marker.pose.position.y = req.pose.position.y  # 0.4
