@@ -115,9 +115,11 @@ class affordanceWrapper:
         self.old_poses = copy.deepcopy(self.curr_poses)
         self.curr_data = request
         self.available_parts = list()
-        tmp_img = self.bridge.imgmsg_to_cv2(self.curr_data.assos_img, self.curr_data.assos_img.encoding)
-        affordanceWrapper.affordance_vis_image = cv2.resize(tmp_img, (256, 256))
-
+        try:
+            tmp_img = self.bridge.imgmsg_to_cv2(self.curr_data.assos_img, self.curr_data.assos_img.encoding)
+            affordanceWrapper.affordance_vis_image = cv2.resize(tmp_img, (256, 256))
+        except:
+            affordanceWrapper.affordance_vis_image = np.zeros((256,256,3), np.uint8)
         self.curr_poses = dict()
         for part in self.curr_data.part_array:
             partname = part.part_id[:-1]
