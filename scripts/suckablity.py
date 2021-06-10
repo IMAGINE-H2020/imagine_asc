@@ -71,11 +71,13 @@ class Suckability:
         markerArray= MarkerArray()
         no = 0    
         any_screw_on_lid=False
+        subtract_flag=False
         for part_ in data.part_array:
             partname=part_.part_id[:-1]
             if partname==self.affordance[0]:
                 part=part_
             if partname=='platters_clamp':
+                subtract_flag=True
                 subtract_part=part_
         part_mask = self.bridge.imgmsg_to_cv2(part.part_outline.part_mask, part.part_outline.part_mask.encoding)
         img_w, img_h = part_mask.shape[0], part_mask.shape[1]
@@ -88,7 +90,7 @@ class Suckability:
         elif self.affordance[0]=='lid' or self.affordance[0]=='pcb':
             suck_points = self.findSuckPoints(part_mask_scaled, width_scaled, height_scaled, 40, 30)
         elif self.affordance[0]=='platter':
-            if subtract_part:
+            if subtract_flag:
                 subtract_part_mask = self.bridge.imgmsg_to_cv2(subtract_part.part_outline.part_mask, subtract_part.part_outline.part_mask.encoding)
                 subtract_part_mask_scaled=self.image_resize(subtract_part_mask,256,256)
                 part_mask_scaled=part_mask_scaled-subtract_part_mask_scaled
