@@ -94,7 +94,7 @@ class Cut:
             ap= ActionParameters()
             ap.confidence=confidences[i]
             cut_point =AscPair()
-            cut_point.key = 'cut_pose'
+            cut_point.key = 'start_pose'
             cut_point.value_type = 2
             cut_point.value_pose.position.x=resp.points[i].x
             cut_point.value_pose.position.y=resp.points[i].y
